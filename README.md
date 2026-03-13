@@ -12,7 +12,7 @@ Automates filling LinkedIn work-experience forms using Playwright. Supports mult
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install playwright
+pip install -r requirements.txt
 playwright install chromium
 ```
 

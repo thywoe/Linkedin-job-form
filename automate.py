@@ -1,16 +1,10 @@
 """
 automate.py — Uses Playwright to fill a job-application form from work_experience_form.json.
 
-Usage:
-    python automate.py [--form work_experience_form.json] [--url <application-url>] [--headless]
-
-Requirements:
-    pip install playwright
-    playwright install chromium
+Run via main.py — this module is not intended to be executed directly.
 """
 
 import json
-import argparse
 import sys
 
 def _import_playwright():
@@ -96,7 +90,8 @@ def dry_run(entries: list) -> None:
         print(f"    Company  : {f['company']['value']}")
         print(f"    Location : {f['city']['value']}")
         print(f"    Start    : {start['month']} {start['year']}")
-        print(f"    End      : {'Present' if currently else f\"{end['month']} {end['year']}\"}")
+        end_str = "Present" if currently else f"{end['month']} {end['year']}"
+        print(f"    End      : {end_str}")
         print(f"    Desc     : {f['description']['value'][:80]}{'...' if len(f['description']['value']) > 80 else ''}")
         print()
 
@@ -221,22 +216,3 @@ def automate(form_path: str, url: str, headless: bool, is_dry_run: bool = False)
         browser.close()
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Automate form filling with Playwright.")
-    parser.add_argument("--form",     default="work_experience_form.json", help="Path to filled form JSON (default: work_experience_form.json)")
-    parser.add_argument("--url",      required=True,              help="URL of the job-application page")
-    parser.add_argument("--headless", action="store_true",        help="Run browser in headless mode (no UI)")
-    args = parser.parse_args()
-
-    try:
-        automate(args.form, args.url, args.headless)
-    except FileNotFoundError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
