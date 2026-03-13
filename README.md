@@ -16,6 +16,16 @@ pip install playwright
 playwright install chromium
 ```
 
+## LinkedIn Authentication
+
+The app does not handle login — you must authenticate manually before running.
+
+1. Open a browser and log in to [linkedin.com](https://www.linkedin.com)
+2. Navigate to the job's Easy Apply page and confirm you can see the application form
+3. Copy the page URL — use it as the `--url` argument
+
+> **Tip:** Run without `--headless` so you can intervene if LinkedIn prompts for verification.
+
 ## Usage
 
 **Step 1 — Fill in your details in `candidate_data.json` (a template is provided), then merge into the form:**
