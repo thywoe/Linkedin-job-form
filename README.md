@@ -18,7 +18,7 @@ playwright install chromium
 
 ## Usage
 
-**Step 1 — Merge candidate data into the form (optional if you already have a filled form):**
+**Step 1 — Fill in your details in `candidate_data.json` (a template is provided), then merge into the form:**
 ```bash
 python3 merge.py --schema schema.json --candidate candidate_data.json --output work_experience_form.json
 ```

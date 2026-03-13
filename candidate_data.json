@@ -1,0 +1,29 @@
+{
+  "candidate": "Your Full Name",
+  "entries": [
+    {
+      "id": 1,
+      "title": "Software Engineer",
+      "company": "Example Corp",
+      "currentlyWorkHere": false,
+      "startMonth": "January",
+      "startYear": 2023,
+      "endMonth": "December",
+      "endYear": 2023,
+      "city": "Berlin, Germany",
+      "description": "Describe your responsibilities and achievements here (max 2000 characters)."
+    },
+    {
+      "id": 2,
+      "title": "Junior Developer",
+      "company": "Another Company",
+      "currentlyWorkHere": false,
+      "startMonth": "June",
+      "startYear": 2021,
+      "endMonth": "December",
+      "endYear": 2022,
+      "city": "Lagos, Nigeria",
+      "description": "Describe your responsibilities and achievements here (max 2000 characters)."
+    }
+  ]
+}

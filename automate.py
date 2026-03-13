@@ -79,9 +79,57 @@ def fill_entry(page, fields: dict, entry_index: int) -> None:
     print(f"  Entry {entry_index + 1} saved: {f['title']['value']} @ {f['company']['value']}")
 
 
+VALID_MONTHS = {
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+}
+
+
+def validate_form(form: dict, form_path: str) -> None:
+    """Validate the filled form JSON before launching the browser."""
+    errors = []
+
+    if "form" not in form or "entries" not in form.get("form", {}):
+        errors.append("Missing top-level 'form.entries' key.")
+        raise ValueError(f"Invalid form file '{form_path}':\n  " + "\n  ".join(errors))
+
+    for i, entry in enumerate(form["form"]["entries"], start=1):
+        fields = entry.get("fields", {})
+        prefix = f"Entry {i}"
+
+        # Required fields
+        for required in ("title", "company", "startDate"):
+            field = fields.get(required, {})
+            if not field.get("value"):
+                errors.append(f"{prefix}: '{required}' is required but empty.")
+
+        # startDate / endDate structure
+        for date_field in ("startDate", "endDate"):
+            date_val = fields.get(date_field, {}).get("value", {})
+            if not isinstance(date_val, dict):
+                errors.append(f"{prefix}: '{date_field}.value' must be an object with 'month' and 'year'.")
+                continue
+            month = date_val.get("month", "")
+            year  = date_val.get("year", "")
+            if month and month not in VALID_MONTHS:
+                errors.append(f"{prefix}: '{date_field}.month' is '{month}', expected a full month name (e.g. 'January').")
+            if year and not str(year).isdigit():
+                errors.append(f"{prefix}: '{date_field}.year' must be a number, got '{year}'.")
+
+        # Description length
+        desc = fields.get("description", {}).get("value", "")
+        if len(desc) > 2000:
+            errors.append(f"{prefix}: 'description' exceeds 2000 characters ({len(desc)}).")
+
+    if errors:
+        raise ValueError(f"Validation failed for '{form_path}':\n  " + "\n  ".join(errors))
+
+
 def automate(form_path: str, url: str, headless: bool) -> None:
     with open(form_path) as f:
         form = json.load(f)
+
+    validate_form(form, form_path)
 
     entries = form["form"]["entries"]
     print(f"Loaded {len(entries)} entr{'y' if len(entries) == 1 else 'ies'} from '{form_path}'.")
