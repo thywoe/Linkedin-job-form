@@ -28,7 +28,28 @@ The app does not handle login — you must authenticate manually before running.
 
 ## Usage
 
-**Step 1 — Fill in your details in `candidate_data.json` (a template is provided), then merge into the form:**
+**Step 1 — Fill in your details in `candidate_data.json`, then merge into the form:**
+
+`candidate_data.json` has two top-level fields:
+
+- `candidate` — your full name (used for reference only)
+- `entries` — list of work experience entries, each with:
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | number | Unique per entry, determines fill order |
+| `title` | string | Job title |
+| `company` | string | Company name |
+| `currentlyWorkHere` | boolean | Set to `true` to leave end date blank |
+| `startMonth` | string | Full month name e.g. `"January"` |
+| `startYear` | number | e.g. `2021` |
+| `endMonth` | string | Full month name — omit or leave `""` if current role |
+| `endYear` | number | Omit or leave `null` if current role |
+| `city` | string | e.g. `"Lagos, Nigeria"` |
+| `description` | string | Max 2000 characters |
+
+Add as many entries as needed — the automation fills them in `id` order.
+
 ```bash
 python3 merge.py --schema schema.json --candidate candidate_data.json --output work_experience_form.json
 ```
