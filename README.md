@@ -43,4 +43,5 @@ python3 main.py --url https://www.linkedin.com/jobs/...
 --url       LinkedIn job application URL (required)
 --form      Path to filled form JSON (default: work_experience_form.json)
 --headless  Run browser without UI
+--dry-run   Preview entries without launching the browser
 ```

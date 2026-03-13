@@ -40,17 +40,78 @@ SELECTORS = {
 }
 
 
+# Human-readable labels for selector error messages
+SELECTOR_LABELS = {
+    "add_more_button": "Add more button",
+    "save_button":     "Save button",
+    "title_input":     "Title field",
+    "company_input":   "Company field",
+    "currently_here":  "Currently work here checkbox",
+    "start_month":     "Start month dropdown",
+    "start_year":      "Start year dropdown",
+    "end_month":       "End month dropdown",
+    "end_year":        "End year dropdown",
+    "city_input":      "City field",
+    "description":     "Description textarea",
+}
+
+
+def _safe_fill(page, selector_key: str, value: str) -> None:
+    label = SELECTOR_LABELS.get(selector_key, selector_key)
+    try:
+        page.fill(SELECTORS[selector_key], value)
+    except Exception:
+        raise RuntimeError(f"{label} not found — LinkedIn may have updated their HTML. "
+                           f"Check the selector: {SELECTORS[selector_key]!r}")
+
+
+def _safe_select(page, selector_key: str, value: str) -> None:
+    label = SELECTOR_LABELS.get(selector_key, selector_key)
+    try:
+        page.select_option(SELECTORS[selector_key], value)
+    except Exception:
+        raise RuntimeError(f"{label} not found — LinkedIn may have updated their HTML. "
+                           f"Check the selector: {SELECTORS[selector_key]!r}")
+
+
+def _safe_click(page, selector_key: str) -> None:
+    label = SELECTOR_LABELS.get(selector_key, selector_key)
+    try:
+        page.click(SELECTORS[selector_key])
+    except Exception:
+        raise RuntimeError(f"{label} not found — LinkedIn may have updated their HTML. "
+                           f"Check the selector: {SELECTORS[selector_key]!r}")
+
+
+def dry_run(entries: list) -> None:
+    """Print a preview of what would be filled without launching the browser."""
+    print(f"Dry run — {len(entries)} entr{'y' if len(entries) == 1 else 'ies'} would be filled:\n")
+    for i, entry in enumerate(entries, start=1):
+        f = entry["fields"]
+        start = f["startDate"]["value"]
+        end   = f["endDate"]["value"]
+        currently = f["currentlyWorkHere"]["value"]
+        print(f"  Entry {i}:")
+        print(f"    Title    : {f['title']['value']}")
+        print(f"    Company  : {f['company']['value']}")
+        print(f"    Location : {f['city']['value']}")
+        print(f"    Start    : {start['month']} {start['year']}")
+        print(f"    End      : {'Present' if currently else f\"{end['month']} {end['year']}\"}")
+        print(f"    Desc     : {f['description']['value'][:80]}{'...' if len(f['description']['value']) > 80 else ''}")
+        print()
+
+
 def fill_entry(page, fields: dict, entry_index: int) -> None:
     """Fill one work-experience entry on the page."""
     f = fields
 
     # Open a new entry panel (skip for first entry if form already has one open)
     if entry_index > 0:
-        page.click(SELECTORS["add_more_button"])
+        _safe_click(page, "add_more_button")
         page.wait_for_timeout(500)
 
-    page.fill(SELECTORS["title_input"],   f["title"]["value"])
-    page.fill(SELECTORS["company_input"], f["company"]["value"])
+    _safe_fill(page, "title_input",   f["title"]["value"])
+    _safe_fill(page, "company_input", f["company"]["value"])
 
     # Checkbox for "currently work here"
     currently = f["currentlyWorkHere"]["value"]
@@ -64,17 +125,17 @@ def fill_entry(page, fields: dict, entry_index: int) -> None:
     start = f["startDate"]["value"]
     end   = f["endDate"]["value"]
 
-    page.select_option(SELECTORS["start_month"], start["month"])
-    page.select_option(SELECTORS["start_year"],  str(start["year"]))
+    _safe_select(page, "start_month", start["month"])
+    _safe_select(page, "start_year",  str(start["year"]))
 
     if not currently:
-        page.select_option(SELECTORS["end_month"], end["month"])
-        page.select_option(SELECTORS["end_year"],  str(end["year"]))
+        _safe_select(page, "end_month", end["month"])
+        _safe_select(page, "end_year",  str(end["year"]))
 
-    page.fill(SELECTORS["city_input"],  f["city"]["value"])
-    page.fill(SELECTORS["description"], f["description"]["value"])
+    _safe_fill(page, "city_input",  f["city"]["value"])
+    _safe_fill(page, "description", f["description"]["value"])
 
-    page.click(SELECTORS["save_button"])
+    _safe_click(page, "save_button")
     page.wait_for_timeout(800)
     print(f"  Entry {entry_index + 1} saved: {f['title']['value']} @ {f['company']['value']}")
 
@@ -125,7 +186,7 @@ def validate_form(form: dict, form_path: str) -> None:
         raise ValueError(f"Validation failed for '{form_path}':\n  " + "\n  ".join(errors))
 
 
-def automate(form_path: str, url: str, headless: bool) -> None:
+def automate(form_path: str, url: str, headless: bool, is_dry_run: bool = False) -> None:
     with open(form_path) as f:
         form = json.load(f)
 
@@ -133,6 +194,10 @@ def automate(form_path: str, url: str, headless: bool) -> None:
 
     entries = form["form"]["entries"]
     print(f"Loaded {len(entries)} entr{'y' if len(entries) == 1 else 'ies'} from '{form_path}'.")
+
+    if is_dry_run:
+        dry_run(entries)
+        return
 
     sync_playwright, PWTimeoutError = _import_playwright()
 
