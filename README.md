@@ -67,6 +67,20 @@ python3 main.py --url https://www.linkedin.com/jobs/...
 --dry-run   Preview entries without launching the browser
 ```
 
+## Testing
+
+Tests cover `merge.py` (data merging logic) and `automate.py` (form validation, dry-run output) — no browser required.
+
+```bash
+python -m pytest test_app.py -v
+```
+
+17 tests across three areas:
+
+- **`TestMerge`** — single/multi-entry merging, missing files, skipped entries
+- **`TestValidateForm`** — required fields, invalid months, year format, description length
+- **`TestDryRun`** — output formatting, current-role display, description truncation
+
 ## Known Problems
 
 | Problem | Cause | Fix |
