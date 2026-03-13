@@ -45,3 +45,13 @@ python3 main.py --url https://www.linkedin.com/jobs/...
 --headless  Run browser without UI
 --dry-run   Preview entries without launching the browser
 ```
+
+## Known Problems
+
+| Problem | Cause | Fix |
+|---|---|---|
+| VSCode uses wrong Python / can't find packages | IDE picks system Python instead of `venv` | Add `.vscode/settings.json` with `"python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python3"` |
+| `playwright install` fails or browser won't launch | Playwright binaries missing or outdated | Re-run `playwright install chromium` inside the activated `venv` |
+| LinkedIn redirects or blocks the automation | Session expired or security check triggered | Log in manually first, run without `--headless` so you can complete any verification prompts |
+| Form fields not found / selectors break | LinkedIn updated their UI | Open an issue with the field name and the selector that failed — selectors may need updating |
+| `work_experience_form.json` is empty or malformed | Bad merge or wrong schema | Run with `--dry-run` to preview entries before launching the browser |
